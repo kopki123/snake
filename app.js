@@ -1,30 +1,32 @@
-const body = document.querySelector('body')
-
 document.addEventListener('DOMContentLoaded', () => {
     let canvas = document.getElementById('canvas')
     let ctx = canvas.getContext('2d');
     
-    let x = 30 // x起始
-    let y = 30 // y起始
-    let length = 3;
+    let x = 10 // x起始
+    let y = 40 // y起始
+    let snake = [
+        {
+            x: 10,
+            y: 40
+        }
+    ]
+
+    let appleDirection = {
+        x: 70,
+        y: 40
+    } 
+
+    let timeSpace = 150
     let direction = null;
-
-
     let timer;
 
-
     if (canvas.getContext) {
-        for(let i = 0; i < length; i++) {
-
-            createSnake(ctx, x - 10 * i, y)
+        for (let i = 0; i < snake.length; i++) {
+            createSnake(ctx, snake[i].x,  snake[i].y)
         }
-        
     }
 
-    createApple(ctx)
-    
-    
-
+    createApple(ctx, appleDirection.x, appleDirection.y)
 
     document.addEventListener('keydown', decideDirection)
 
@@ -34,101 +36,173 @@ document.addEventListener('DOMContentLoaded', () => {
 
         switch (code) {
             case "ArrowUp":
-                console.log('up');
-
+                if(direction === "ArrowDown") break;
                 direction = "ArrowUp"
                 break;
             case "ArrowDown":
-                console.log('down');
+                if(direction === "ArrowUp") break;
                 direction = "ArrowDown"
                 break;
             case "ArrowLeft":
-                console.log('left');
+                if(direction === "ArrowRight") break;
                 direction = "ArrowLeft"
                 break;
             case "ArrowRight":
-                console.log('right');
+                if(direction === "ArrowLeft") break;
                 direction = "ArrowRight"
                 break;
         }
 
         timer = setInterval(()=> {
             move(direction)
-        }, 150)
+            createApple(ctx, appleDirection.x, appleDirection.y)
+            checkGameOver()
+            
+            eatApple(direction)
+            
+        }, timeSpace)
     }
 
-    
-
     function move(direction) {
-        let lastX = x;
-        let lastY = y
+        
 
         switch (direction) {
             case "ArrowUp":
-                console.log('up');
-
-                y -= 10
-                ctx.clearRect(0,0,100,100);
-
                 
+                y -= 10
+                snake.unshift({x: x, y: y})
+                snake.pop()
 
-                for(let i = 0; i < length; i++) {
-                    createSnake(ctx, lastX, lastY)
-
-                    lastY -= 10
+                ctx.clearRect(0, 0, 100, 100)
+                for (let i = 0; i < snake.length; i++) {
+                    createSnake(ctx, snake[i].x,  snake[i].y)
                 }
                 
-                createApple(ctx)
                 break;
             case "ArrowDown":
-                console.log('down');
+                
 
                 y += 10
 
-                ctx.clearRect(0,0,100,100);
-                
+                snake.unshift({x: x, y: y})
+                snake.pop()
 
-                for(let i = 0; i < length; i++) {
-                    createSnake(ctx, lastX, lastY)
-
-                    lastY -= 10
-
+                ctx.clearRect(0, 0, 100, 100)
+                for (let i = 0; i < snake.length; i++) {
+                    createSnake(ctx, snake[i].x,  snake[i].y)
                 }
-
-                createApple(ctx)
+                
                 break;
             case "ArrowLeft":
-                console.log('left');
                 x -= 10
-                ctx.clearRect(0,0,500,500);
-                
 
-                for(let i = 0; i < length; i++) {
-                    createSnake(ctx, lastX, lastY)
+                snake.unshift({x: x, y: y})
+                snake.pop()
 
-                    lastX -= 10;
-
+                ctx.clearRect(0, 0, 100, 100)
+                for (let i = 0; i < snake.length; i++) {
+                    createSnake(ctx, snake[i].x,  snake[i].y)
                 }
-
-                createApple(ctx)
+                
                 break;
             case "ArrowRight":
-                console.log('right');
+               
 
                 x += 10
 
-                ctx.clearRect(0,0,500,500);
-                
+                snake.unshift({x: x, y: y})
+                snake.pop()
 
-                for(let i = 0; i < length; i++) {
-                    createSnake(ctx, lastX, lastY)
-
-                    lastX += 10;
+                ctx.clearRect(0, 0, 100, 100)
+                for (let i = 0; i < snake.length; i++) {
+                    createSnake(ctx, snake[i].x,  snake[i].y)
                 }
                 
-                createApple(ctx)
-
+                
                 break;
+        }
+    }
+
+    function eatApple(direction) {
+        if(x !== appleDirection.x || y !== appleDirection.y) return;
+    
+        // switch (direction) {
+        //     case "ArrowUp":
+        //         y -= 10
+        //         snake.unshift({x: x, y: y})
+        //         break;
+        //     case "ArrowDown":
+        //         y += 10
+        //         snake.unshift({x: x, y: y})
+        //         break;
+        //     case "ArrowLeft":
+        //         x -= 10
+        //         snake.unshift({x: x, y: y})
+        //         break;
+        //     case "ArrowRight":
+        //         x += 10
+        //         snake.unshift({x: x, y: y})
+        //         break;
+        // }
+
+        snake.push({x: snake[snake.length - 1].x - 10, y: snake[snake.length - 1].y})
+        let newAppleX = getRandomNumber(10) * 10
+        let newAppleY = getRandomNumber(10) * 10
+
+        let repeatLocation = snake.some(tile => {
+            return tile.x === newAppleX && tile.y === newAppleY
+        })
+
+        while(repeatLocation) {
+            newAppleX = getRandomNumber(10) * 10
+            newAppleY = getRandomNumber(10) * 10
+
+            repeatLocation = snake.some(tile => {
+                return tile.x === newAppleX && tile.y === newAppleY
+            })
+        }
+
+        appleDirection = {
+            x: newAppleX,
+            y: newAppleY
+        }
+        
+    }
+    
+
+    function checkGameOver() {
+        let repeatLocation = snake.some((tile, index) => {
+            if(index === 0) return false
+            return tile.x === x && tile.y === y
+        })
+
+
+        if(x < 0 || x >= 100 || y < 0 || y >= 100 || repeatLocation ) {
+            alert('Game Over 🐍')
+            clearInterval(timer)
+            direction = null
+            x = 10;
+            y = 40;
+            snake = [
+                {
+                    x: 10,
+                    y: 40
+                }
+            ]
+
+            appleDirection = {
+                x: 70,
+                y: 40
+            }
+            ctx.clearRect(0, 0, 100, 100)
+
+            if (canvas.getContext) {
+                for (let i = 0; i < snake.length; i++) {
+                    createSnake(ctx, snake[i].x,  snake[i].y)
+                }
+            }
+        
+            createApple(ctx, appleDirection.x, appleDirection.y)
         }
     }
 })
@@ -141,21 +215,21 @@ function createSnake(ctx, x, y) {
     ctx.lineTo(x, y + 10);
     ctx.fillStyle = 'black'
     ctx.fill();
-
 }
 
-
-function createApple(ctx) {
+function createApple(ctx, x, y) {
     ctx.beginPath();
-    ctx.moveTo(70,70);
-    ctx.lineTo(80, 70);
-    ctx.lineTo(80, 80);
-    ctx.lineTo(70, 80);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 10, y);
+    ctx.lineTo(x + 10, y + 10);
+    ctx.lineTo(x, y + 10);
     ctx.fillStyle = 'red'
     ctx.fill();
 }
 
 
-
+function getRandomNumber(max) {
+    return Math.floor(Math.random() * max);
+}
 
 
