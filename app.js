@@ -16,6 +16,8 @@ let applePosition = {
 let direction = null;
 let timer;
 
+const snakeLenght = document.querySelector('span');
+
 document.addEventListener('DOMContentLoaded', () => {
     let canvas = document.querySelector('canvas');
     let ctx = canvas.getContext('2d');
@@ -28,34 +30,37 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', decideDirection);
 
     function decideDirection(e) {
-        clearInterval(timer);
+        
     
         switch (e.code) {
             case "ArrowUp":
-                if(direction === "ArrowDown") break;
+                if(direction === "ArrowDown" || direction === "ArrowUp") break;
                 direction = "ArrowUp";
                 break;
             case "ArrowDown":
-                if(direction === "ArrowUp") break;
+                if(direction === "ArrowUp" || direction === "ArrowDown") break;
                 direction = "ArrowDown";
                 break;
             case "ArrowLeft":
-                if(direction === "ArrowRight") break;
+                if(direction === "ArrowRight" || direction === "ArrowLeft") break;
                 direction = "ArrowLeft";
                 break;
             case "ArrowRight":
-                if(direction === "ArrowLeft") break;
+                if(direction === "ArrowLeft" || direction === "ArrowRight") break;
                 direction = "ArrowRight";
                 break;
         }
     
-        timer = setInterval(()=> {
-            move()
-            drawRect(ctx, applePosition.x, applePosition.y, 'red')
-            checkGameOver()
-            eatApple()
-        }, 150)   
+        
     }
+
+    timer = setInterval(()=> {
+        move()
+        drawRect(ctx, applePosition.x, applePosition.y, 'red')
+        checkGameOver()
+        eatApple()
+        snakeLenght.innerText = snake.length;
+    }, 150)   
     
     function move() {
         switch (direction) {
@@ -124,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         if(x < 0 || x >= 100 || y < 0 || y >= 100 || repeatLocation ) {
             alert('Game Over 🐍');
-            clearInterval(timer);
+            // clearInterval(timer);
             
             snake = [
                 {
